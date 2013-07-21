@@ -1,13 +1,43 @@
 import sys, zipfile, os, shutil, os.path
 from PIL import Image
 from bs4 import BeautifulSoup
+from argparse import ArgumentParser
 
-filename = sys.argv[1]
+# create cmd-line argument parser
+descr = "This tool converts epub files into many png images."
+parser =  ArgumentParser(
+	description = descr,
+)
+parser.add_argument(
+	"-c",
+	"--color",
+	action = "store",
+	default = "#000",
+	required = False,
+	help = "Set document text color to color specified in hexadecimal (e.g. #ABCDEF)",
+	metavar = "col",
+	dest = "textColor"
+)
+parser.add_argument(
+	"-f",
+	"--font",
+	action = "store",
+	default = "Arial",
+	required = False,
+	help = "Set document text font to given font",
+	metavar = "font",
+	dest = "textFont"
+)
+parser.add_argument(
+	"file",
+	help = "Epub file to be converted"
+)
 
-if filename[-5:] != ".epub" or len(sys.argv) != 2:
-	print "Usage: %s <epub file>" % sys.argv[0]
-	sys.exit(1)
+args = parser.parse_args()
 
+filename = args.file
+
+# create needed cirectories
 imgDir = os.path.join(os.path.dirname(filename), "%s_images" % os.path.basename(filename)[:-5])
 if not os.path.exists(imgDir): os.mkdir(imgDir)
 
@@ -19,7 +49,7 @@ html * {
 		font-family: %s !important;
 	}
 """
-customCss = css % ("2em", "#000", "Arial")
+customCss = css % ("1em", args.textColor, args.textFont)
 
 with zipfile.ZipFile(filename, 'r') as zipper:
 	for mem in [f if "html" in f else None for f in zipper.namelist()]:
