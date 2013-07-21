@@ -1,5 +1,6 @@
 import sys, zipfile, os, shutil, os.path
 from PIL import Image
+from bs4 import BeautifulSoup
 
 filename = sys.argv[1]
 
@@ -18,7 +19,7 @@ html * {
 		font-family: %s !important;
 	}
 """
-customCss = css % ("1em", "#000", "Arial")
+customCss = css % ("2em", "#000", "Arial")
 
 with zipfile.ZipFile(filename, 'r') as zipper:
 	for mem in [f if "html" in f else None for f in zipper.namelist()]:
@@ -32,12 +33,17 @@ with zipfile.ZipFile(filename, 'r') as zipper:
 			zipper.extract(mem)
 
 			# apply custom css to html
-			#print "> Applying custom css"
-			#f = open(mem, "r+")
-			#cont = f.read()
-			#newCont = cont.replace('<style type="text/css">', '<style type="text/css">%s' % customCss)
-			#f.write(newCont)
-			#f.close()
+			print "> Applying custom css"
+			f = open(mem, "r")
+			cont = f.read()
+			f.close()
+			soup = BeautifulSoup(cont)
+			# append custom css file to all style tags
+			for tag in soup.findAll('style', type='text/css'):
+				tag.string += customCss
+			f = open(mem, "w")
+			f.write(str(soup))
+			f.close()
 
 			# render html file to image
 			imgName =  "%s.png" % os.path.basename(mem).split(".")[0]
