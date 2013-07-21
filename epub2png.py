@@ -4,9 +4,8 @@ from bs4 import BeautifulSoup
 from argparse import ArgumentParser
 
 # create cmd-line argument parser
-descr = "This tool converts epub files into many png images."
 parser =  ArgumentParser(
-	description = descr,
+	description = "This tool converts epub files into many png images.",
 )
 parser.add_argument(
 	"-c",
@@ -14,7 +13,7 @@ parser.add_argument(
 	action = "store",
 	default = "#000",
 	required = False,
-	help = "Set document text color to color specified in hexadecimal (e.g. #ABCDEF)",
+	help = "set document text color to color specified in hexadecimal (e.g. #ABCDEF)",
 	metavar = "col",
 	dest = "textColor"
 )
@@ -24,13 +23,23 @@ parser.add_argument(
 	action = "store",
 	default = "Arial",
 	required = False,
-	help = "Set document text font to given font",
+	help = "set document text font to given font",
 	metavar = "font",
 	dest = "textFont"
 )
 parser.add_argument(
+	"-s",
+	"--size",
+	action = "store",
+	default = "1em",
+	required = False,
+	help = "set document text size (e.g. 1.3em or 123px)",
+	metavar = "size",
+	dest = "textSize"
+)
+parser.add_argument(
 	"file",
-	help = "Epub file to be converted"
+	help = "epub file to be converted"
 )
 
 args = parser.parse_args()
@@ -49,7 +58,7 @@ html * {
 		font-family: %s !important;
 	}
 """
-customCss = css % ("1em", args.textColor, args.textFont)
+customCss = css % (args.textSize, args.textColor, args.textFont)
 
 with zipfile.ZipFile(filename, 'r') as zipper:
 	for mem in [f if "html" in f else None for f in zipper.namelist()]:
