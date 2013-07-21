@@ -100,7 +100,16 @@ with zipfile.ZipFile(filename, 'r') as zipper:
 			for i in [i if i % 800 == 0 else None for i in range(0, img.size[1] + 1)]:
 				if i != None:
 					print ">>> Offset: %i" % i
-					chunk = img.crop((0, i, 600, i + 800))
+					line = i + 800
+					if line > img.size[1]:
+						# don't crop too much
+						line -= line - img.size[1]
+					chunk = img.crop((0, i, 600, line))
+					if chunk.size != (600, 800):
+						print ">>>> Recropping"
+						back = Image.new(mode = 'RGB', size = (600, 800), color = (255, 255, 255))
+						back.paste(chunk, (0, 0))
+						chunk = back
 					chunkName = "%s_%i.png" % (imgName.split(".")[0], c)
 					chunkFile = os.path.join(imgDir, chunkName)
 					chunk.save(chunkFile, "PNG")
